@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import pickle
 import numpy as np
-
+import uvicorn
 
 app = FastAPI()
 
@@ -35,4 +35,6 @@ async def classifier(data: ClassifierInput):
 def read_root():
     return {"message": "Hello, this is the root endpoint!"}
 
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 # uvicorn main.py:app --reload
