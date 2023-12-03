@@ -7,30 +7,54 @@ import uvicorn
 app = FastAPI()
 
 # Cargar el modelo pickle y el escalador
-with open('modelo_knn_predict.pkl', 'rb') as file:
-    model, scaler= pickle.load(file)
+with open('modelo_knn_predict.pkl', 'rb') as file1:
+    model1, scaler1= pickle.load(file1)
+
+# Cargar el modelo pickle
+with open('modelo_knn_classifier.pkl', 'rb') as file2:
+    model2 = pickle.load(file2)
 
 
-class PredictionInput(BaseModel):
+# Definir el esquema Pydantic para las entradas de la API
+class InputP(BaseModel):
     total_docs: int
     new_cites: int
     best_quartile: int
     total_refs: int
     sjr: float
 
+class InputC(BaseModel):
+    total_docs: int
+    new_cites: int
+    best_quartile: int
+    total_refs: int
+
 @app.post("/predict")
-async def predict(data: PredictionInput):
+async def predict(data: InputP):
     # Convertir datos de entrada a un array numpy
-    input_data = np.array([[data.total_docs, data.sjr, data.new_cites, data.best_quartile, data.total_refs]])
+    input_data= np.array([[data.total_docs, data.sjr, data.new_cites, data.best_quartile, data.total_refs]])
 
     # Escalar datos con MinMaxScaler
-    input_data_scaled = scaler.transform(input_data)
+    input_data_scaled = scaler1.transform(input_data)
 
     # Realizar la predicción con el modelo
-    prediction = model.predict(input_data_scaled)
+    prediction = model1.predict(input_data_scaled)
     
     # Devolver la predicción como respuesta
     return {"prediction": float(prediction[0])}
+# Endpoint para realizar predicciones
+
+@app.post("/classifier")
+async def classifier(data: InputC):
+    # Convertir datos de entrada a un array numpy
+    input_data = np.array([[data.total_docs, data.new_cites, data.best_quartile, data.total_refs]])
+    
+    # Realizar la predicción con el modelo
+    classifier = model2.predict(input_data)
+    
+    # Devolver la predicción como respuesta
+    return {"classifier": classifier[0]}
+
 
 @app.get("/")
 def read_root():
