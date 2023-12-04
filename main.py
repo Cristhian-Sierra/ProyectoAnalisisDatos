@@ -3,9 +3,19 @@ from pydantic import BaseModel
 import pickle
 import numpy as np
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+ 
 # Cargar el modelo pickle y el escalador
 with open('modelo_knn_predict.pkl', 'rb') as file1:
     model1, scaler1= pickle.load(file1)
